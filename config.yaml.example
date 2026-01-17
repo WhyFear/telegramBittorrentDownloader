@@ -1,0 +1,17 @@
+Proxy:
+  URL: "" # 代理地址，例如 http://127.0.0.1:7890，留空则不使用代理
+bot:
+  bot_name: "your_bot_name" # 你的机器人用户名（不含 @）
+  token: "your_bot_token"   # 从 @BotFather 获取的 Token
+searcher:
+  - name: "nyaa"
+    enable: true
+downloader:
+  - name: "qbittorrent"
+    enable: true
+    username: "admin"        # qBittorrent 用户名
+    password: "adminadmin"   # qBittorrent 密码
+    api_url: "http://localhost:8080" # qBittorrent Web UI 地址，确保外网可访问或与程序在同一网络
+    extra:
+      category: ""           # 可选：下载分类，留空则使用默认
+      save_path: ""          # 可选：保存路径，留空则使用默认
