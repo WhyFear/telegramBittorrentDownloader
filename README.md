@@ -51,13 +51,18 @@ go run main.go init.go
 ```
 
 #### 使用 Docker (推荐)
-本项目包含 GitHub Actions 工作流，可自动构建 Docker 镜像。
 
+1. **构建镜像**：
+```bash
+docker build -t tg-bt-downloader .
+```
+
+2. **运行容器**：
 ```bash
 docker run -d \
   --name tg-bt-downloader \
-  -v ./config.yaml:/app/config.yaml \
-  your-docker-image
+  -v $(pwd)/config.yaml:/app/config.yaml \
+  tg-bt-downloader
 ```
 
 ## 使用方法

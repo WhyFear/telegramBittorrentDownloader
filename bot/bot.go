@@ -73,7 +73,12 @@ func InitBot(ctx context.Context, config *types.Config, service *serivce.Service
 		magnetHash := c.Callback().Data
 		magnet := "magnet:?xt=urn:btih:" + magnetHash
 
-		err := service.Downloader["qbittorrent"].AddMagnet(ctx, magnet)
+		dl, ok := service.Downloader["qbittorrent"]
+		if !ok || dl == nil {
+			return c.Send("❌ 错误：qBittorrent 下载器未配置或初始化失败")
+		}
+
+		err := dl.AddMagnet(ctx, magnet)
 		if err != nil {
 			return c.Send(fmt.Sprintf("❌ 添加下载失败: %s", err.Error()))
 		}
@@ -127,7 +132,12 @@ func addMagnet(ctx context.Context, magnet string, service *serivce.Service) err
 		}
 	}
 
-	err := service.Downloader["qbittorrent"].AddMagnet(ctx, magnet)
+	dl, ok := service.Downloader["qbittorrent"]
+	if !ok || dl == nil {
+		return fmt.Errorf("qBittorrent 下载器未配置或初始化失败")
+	}
+
+	err := dl.AddMagnet(ctx, magnet)
 	return err
 }
 
@@ -136,7 +146,12 @@ func handleSearch(ctx context.Context, c tele.Context, service *serivce.Service,
 	query = strings.ReplaceAll(query, " ", "+")
 	slog.InfoContext(ctx, "Searching for torrents", "query", query, "page", page)
 
-	result, err := service.Searcher["nyaa"].Search(ctx, query)
+	s, ok := service.Searcher["nyaa"]
+	if !ok || s == nil {
+		return c.Send("❌ 错误：Nyaa 搜索器未配置或初始化失败")
+	}
+
+	result, err := s.Search(ctx, query)
 	if err != nil {
 		return c.Send(fmt.Sprintf("搜索失败: %s", err.Error()))
 	}
