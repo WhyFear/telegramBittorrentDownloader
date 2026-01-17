@@ -8,27 +8,29 @@ import (
 )
 
 func initSearcher(config *types.Config) map[string]*searcher2.Search {
+	searchers := make(map[string]*searcher2.Search)
 	for _, s := range config.Searcher {
 		if s.Enable {
-			return map[string]*searcher2.Search{
-				// todo 按名字初始化
-				s.Name: searcher2.NewNyaaSearcher(config.Proxy.Client),
+			if s.Name == "nyaa" {
+				searchers[s.Name] = searcher2.NewNyaaSearcher(config.Proxy.Client)
 			}
+			// todo 可以在这里添加其他搜索器的初始化逻辑
 		}
 	}
-	return nil
+	return searchers
 }
 
 func initDownloader(config *types.Config) map[string]*downloader2.Download {
+	downloaders := make(map[string]*downloader2.Download)
 	for _, d := range config.Downloader {
 		if d.Enable {
-			return map[string]*downloader2.Download{
-				// todo 按名字初始化
-				d.Name: downloader2.NewQBittorrentDownloader(d),
+			if d.Name == "qbittorrent" {
+				downloaders[d.Name] = downloader2.NewQBittorrentDownloader(d)
 			}
+			// todo 可以在这里添加其他下载器的初始化逻辑
 		}
 	}
-	return nil
+	return downloaders
 }
 
 func InitAll(config *types.Config) *serivce.Service {

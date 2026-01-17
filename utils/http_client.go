@@ -13,13 +13,13 @@ import (
 
 func NewProxyClient(config *types.Config) *http.Client {
 	if config.Proxy.URL == "" {
-		slog.Info("Proxy URL is empty, skip proxy")
-		return nil
+		slog.Info("Proxy URL is empty, using default client")
+		return &http.Client{}
 	}
 	proxyURL, err := url.Parse(config.Proxy.URL)
 	if err != nil {
-		slog.Error("Failed to parse proxy URL", "error", err)
-		return nil
+		slog.Error("Failed to parse proxy URL", "error", err, "url", config.Proxy.URL)
+		return &http.Client{}
 	}
 	transport := &http.Transport{
 		Proxy: http.ProxyURL(proxyURL),

@@ -1,0 +1,20 @@
+# Docker ignore file
+.git
+.github
+.vscode
+.idea
+bin
+dist
+*.log
+config.yaml
+README.md
+Dockerfile
+.dockerignore
+go.sum
+go.mod
+# Ignore local development files
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
