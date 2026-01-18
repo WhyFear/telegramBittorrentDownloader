@@ -1,10 +1,10 @@
 package main
 
 import (
-	"telegramBittorrentDownloader/serivce"
-	"telegramBittorrentDownloader/serivce/cache"
-	downloader2 "telegramBittorrentDownloader/serivce/downloader"
-	searcher2 "telegramBittorrentDownloader/serivce/searcher"
+	"telegramBittorrentDownloader/service"
+	"telegramBittorrentDownloader/service/cache"
+	downloader2 "telegramBittorrentDownloader/service/downloader"
+	searcher2 "telegramBittorrentDownloader/service/searcher"
 	"telegramBittorrentDownloader/types"
 )
 
@@ -38,11 +38,11 @@ func initCache() *cache.Cache {
 	return cache.NewOtterCache()
 }
 
-func InitAll(config *types.Config) *serivce.Service {
+func InitAll(config *types.Config) *service.Service {
 	searchers := initSearcher(config)
 	downloaders := initDownloader(config)
 	otterCache := initCache()
-	return &serivce.Service{
+	return &service.Service{
 		Cache:      otterCache,
 		Searcher:   searchers,
 		Downloader: downloaders,

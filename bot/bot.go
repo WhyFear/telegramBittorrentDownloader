@@ -6,7 +6,7 @@ import (
 	"log/slog"
 	"strconv"
 	"strings"
-	"telegramBittorrentDownloader/serivce"
+	"telegramBittorrentDownloader/service"
 	"telegramBittorrentDownloader/types"
 	"time"
 
@@ -18,7 +18,7 @@ const (
 	titleMaxLength = 50 // 标题最大长度，超过部分截断
 )
 
-func InitBot(ctx context.Context, config *types.Config, service *serivce.Service) {
+func InitBot(ctx context.Context, config *types.Config, service *service.Service) {
 	pref := tele.Settings{
 		Token:  config.Bot.Token,
 		Client: config.Proxy.Client,
@@ -44,7 +44,7 @@ func InitBot(ctx context.Context, config *types.Config, service *serivce.Service
 
 	b.Handle("/qb", func(c tele.Context) error {
 		magnet := c.Message().Payload
-		err = addMagnet(ctx, magnet, service)
+		err := addMagnet(ctx, magnet, service)
 		if err != nil {
 			return c.Send(fmt.Sprintf("添加下载失败: %s", err.Error()))
 		}
@@ -61,7 +61,7 @@ func InitBot(ctx context.Context, config *types.Config, service *serivce.Service
 					slog.InfoContext(ctx, "命中缓存", "magnet", magnet, "magnetLink", magnetLink)
 					magnet = magnetLink
 				}
-				err = addMagnet(ctx, magnet, service)
+				err := addMagnet(ctx, magnet, service)
 				if err != nil {
 					return c.Send(fmt.Sprintf("添加下载失败: %s", err.Error()))
 				}
@@ -122,7 +122,7 @@ func InitBot(ctx context.Context, config *types.Config, service *serivce.Service
 	b.Start()
 }
 
-func addMagnet(ctx context.Context, magnet string, service *serivce.Service) error {
+func addMagnet(ctx context.Context, magnet string, service *service.Service) error {
 	magnet = strings.TrimSpace(magnet)
 	if magnet == "" {
 		return fmt.Errorf("磁力链接不能为空")
@@ -147,7 +147,7 @@ func addMagnet(ctx context.Context, magnet string, service *serivce.Service) err
 }
 
 // 处理搜索和翻页逻辑
-func handleSearch(ctx context.Context, c tele.Context, service *serivce.Service, query string, page int, botName string) error {
+func handleSearch(ctx context.Context, c tele.Context, service *service.Service, query string, page int, botName string) error {
 	query = strings.ReplaceAll(query, " ", "+")
 	slog.InfoContext(ctx, "Searching for torrents", "query", query, "page", page)
 
