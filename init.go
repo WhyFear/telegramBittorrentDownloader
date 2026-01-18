@@ -2,6 +2,7 @@ package main
 
 import (
 	"telegramBittorrentDownloader/serivce"
+	"telegramBittorrentDownloader/serivce/cache"
 	downloader2 "telegramBittorrentDownloader/serivce/downloader"
 	searcher2 "telegramBittorrentDownloader/serivce/searcher"
 	"telegramBittorrentDownloader/types"
@@ -33,10 +34,16 @@ func initDownloader(config *types.Config) map[string]*downloader2.Download {
 	return downloaders
 }
 
+func initCache() *cache.Cache {
+	return cache.NewOtterCache()
+}
+
 func InitAll(config *types.Config) *serivce.Service {
 	searchers := initSearcher(config)
 	downloaders := initDownloader(config)
+	otterCache := initCache()
 	return &serivce.Service{
+		Cache:      otterCache,
 		Searcher:   searchers,
 		Downloader: downloaders,
 	}

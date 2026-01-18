@@ -56,6 +56,11 @@ func InitBot(ctx context.Context, config *types.Config, service *serivce.Service
 		magnet = strings.TrimSpace(magnet)
 		if magnet != "" {
 			if len(magnet) == 40 {
+				magnetLink, _ := service.Cache.Get(magnet)
+				if magnetLink != "" {
+					slog.InfoContext(ctx, "命中缓存", "magnet", magnet, "magnetLink", magnetLink)
+					magnet = magnetLink
+				}
 				err = addMagnet(ctx, magnet, service)
 				if err != nil {
 					return c.Send(fmt.Sprintf("添加下载失败: %s", err.Error()))
@@ -178,7 +183,7 @@ func handleSearch(ctx context.Context, c tele.Context, service *serivce.Service,
 	safeQuery = strings.ReplaceAll(safeQuery, "<", "&lt;")
 	safeQuery = strings.ReplaceAll(safeQuery, ">", "&gt;")
 
-	msg.WriteString(fmt.Sprintf("搜索: %s\n", safeQuery))
+	msg.WriteString(fmt.Sprintf("搜索内容: %s\n", safeQuery))
 	msg.WriteString(fmt.Sprintf("第 %d/%d 页 (共 %d 个结果)\n\n", page+1, totalPages, len(result.Data)))
 
 	for i := start; i < end; i++ {
@@ -203,6 +208,10 @@ func handleSearch(ctx context.Context, c tele.Context, service *serivce.Service,
 			if endIdx := strings.Index(hash, "&"); endIdx != -1 {
 				hash = hash[:endIdx]
 			}
+		}
+		err = service.Cache.Set(hash, magnet)
+		if err != nil {
+			slog.ErrorContext(ctx, "Failed to set cache", "hash", hash, "magnet", magnet, "error", err)
 		}
 
 		msg.WriteString(fmt.Sprintf("📌 %s\n", title))

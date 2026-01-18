@@ -8,6 +8,10 @@ require (
 )
 
 require (
+	github.com/davecgh/go-spew v1.1.1 // indirect
+	github.com/maypok86/otter/v2 v2.3.0 // indirect
+	github.com/pmezard/go-difflib v1.0.0 // indirect
+	github.com/stretchr/testify v1.11.1 // indirect
 	github.com/superturkey650/go-qbittorrent v0.0.0-20250509144237-d119a59ccf27 // indirect
 	golang.org/x/net v0.38.0 // indirect
 )
