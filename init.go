@@ -8,8 +8,8 @@ import (
 	"telegramBittorrentDownloader/types"
 )
 
-func initSearcher(config *types.Config) map[string]*searcher2.Search {
-	searchers := make(map[string]*searcher2.Search)
+func initSearcher(config *types.Config) map[string]searcher2.Searcher {
+	searchers := make(map[string]searcher2.Searcher)
 	for _, s := range config.Searcher {
 		if s.Enable {
 			if s.Name == "nyaa" {
@@ -21,8 +21,8 @@ func initSearcher(config *types.Config) map[string]*searcher2.Search {
 	return searchers
 }
 
-func initDownloader(config *types.Config) map[string]*downloader2.Download {
-	downloaders := make(map[string]*downloader2.Download)
+func initDownloader(config *types.Config) map[string]downloader2.Downloader {
+	downloaders := make(map[string]downloader2.Downloader)
 	for _, d := range config.Downloader {
 		if d.Enable {
 			if d.Name == "qbittorrent" {

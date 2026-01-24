@@ -9,23 +9,25 @@ import (
 	"net/http"
 	"net/url"
 	"telegramBittorrentDownloader/types"
+	"time"
 )
 
 func NewProxyClient(config *types.Config) *http.Client {
 	if config.Proxy.URL == "" {
 		slog.Info("Proxy URL is empty, using default client")
-		return &http.Client{}
+		return &http.Client{Timeout: time.Second * 5}
 	}
 	proxyURL, err := url.Parse(config.Proxy.URL)
 	if err != nil {
 		slog.Error("Failed to parse proxy URL", "error", err, "url", config.Proxy.URL)
-		return &http.Client{}
+		return &http.Client{Timeout: time.Second * 5}
 	}
 	transport := &http.Transport{
 		Proxy: http.ProxyURL(proxyURL),
 	}
 	client := &http.Client{
 		Transport: transport,
+		Timeout:   time.Second * 5,
 	}
 	return client
 }

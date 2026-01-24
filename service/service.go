@@ -7,7 +7,7 @@ import (
 )
 
 type Service struct {
-	Searcher   map[string]*searcher.Search
-	Downloader map[string]*downloader.Download
+	Searcher   map[string]searcher.Searcher
+	Downloader map[string]downloader.Downloader
 	Cache      *cache.Cache
 }

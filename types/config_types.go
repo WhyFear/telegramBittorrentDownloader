@@ -3,6 +3,9 @@ package types
 import "net/http"
 
 type Config struct {
+	// SenderID 是允许使用该 bot 的用户 ID 列表
+	// 如果 SenderID 为空，则表示允许所有用户使用该 bot
+	SenderID   []int64      `yaml:"SenderID"`
 	Proxy      Proxy        `yaml:"Proxy"`
 	Bot        Bot          `yaml:"bot"`
 	Searcher   []Searcher   `yaml:"searcher"`
