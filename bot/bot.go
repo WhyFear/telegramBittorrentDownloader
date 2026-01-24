@@ -32,8 +32,27 @@ func InitBot(ctx context.Context, config *types.Config, service *service.Service
 	}
 	slog.InfoContext(ctx, "Bot started", "bot_name", config.Bot.BotName)
 
+	whiteListOnly := b.Group()
+	if config.SenderID != nil && len(config.SenderID) > 0 {
+		whiteListOnly.Use(func(next tele.HandlerFunc) tele.HandlerFunc {
+			return func(c tele.Context) error {
+				if c.Sender() == nil {
+					return next(c)
+				}
+				if err := checkUser(config, c.Sender().ID); err != nil {
+					if c.Callback() != nil {
+						_ = c.Respond(&tele.CallbackResponse{Text: fmt.Sprintf("%v 你好，你不在白名单中，无法使用该 bot，你的 ID 为 %d", c.Sender().Username, c.Sender().ID)})
+						return nil
+					}
+					return c.Send(fmt.Sprintf("%v 你好，你不在白名单中，无法使用该 bot，你的 ID 为 %d", c.Sender().Username, c.Sender().ID))
+				}
+				return next(c)
+			}
+		})
+	}
+
 	// 处理搜索命令
-	b.Handle("/nyaa", func(c tele.Context) error {
+	whiteListOnly.Handle("/nyaa", func(c tele.Context) error {
 		query := c.Message().Payload
 		query = strings.TrimSpace(query)
 		if query == "" {
@@ -42,7 +61,7 @@ func InitBot(ctx context.Context, config *types.Config, service *service.Service
 		return handleSearch(ctx, c, service, query, 0, config.Bot.BotName)
 	})
 
-	b.Handle("/qb", func(c tele.Context) error {
+	whiteListOnly.Handle("/qb", func(c tele.Context) error {
 		magnet := c.Message().Payload
 		err := addMagnet(ctx, magnet, service)
 		if err != nil {
@@ -51,7 +70,7 @@ func InitBot(ctx context.Context, config *types.Config, service *service.Service
 		return c.Send("✅ 已成功添加到 qBittorrent")
 	})
 
-	b.Handle("/start", func(c tele.Context) error {
+	whiteListOnly.Handle("/start", func(c tele.Context) error {
 		magnet := c.Message().Payload
 		magnet = strings.TrimSpace(magnet)
 		if magnet != "" {
@@ -73,7 +92,7 @@ func InitBot(ctx context.Context, config *types.Config, service *service.Service
 	})
 
 	// 处理下载回调
-	b.Handle(&tele.InlineButton{Unique: "dl_qb"}, func(c tele.Context) error {
+	whiteListOnly.Handle(&tele.InlineButton{Unique: "dl_qb"}, func(c tele.Context) error {
 		defer c.Respond(&tele.CallbackResponse{Text: "正在添加到 qBittorrent..."})
 		magnetHash := c.Callback().Data
 		magnet := "magnet:?xt=urn:btih:" + magnetHash
@@ -91,7 +110,7 @@ func InitBot(ctx context.Context, config *types.Config, service *service.Service
 	})
 
 	// 处理翻页回调
-	b.Handle(&tele.InlineButton{Unique: "prev_page"}, func(c tele.Context) error {
+	whiteListOnly.Handle(&tele.InlineButton{Unique: "prev_page"}, func(c tele.Context) error {
 		defer c.Respond()
 		data := c.Callback().Data
 		parts := strings.Split(data, "|")
@@ -106,7 +125,7 @@ func InitBot(ctx context.Context, config *types.Config, service *service.Service
 		return handleSearch(ctx, c, service, query, page, config.Bot.BotName)
 	})
 
-	b.Handle(&tele.InlineButton{Unique: "next_page"}, func(c tele.Context) error {
+	whiteListOnly.Handle(&tele.InlineButton{Unique: "next_page"}, func(c tele.Context) error {
 		defer c.Respond()
 		data := c.Callback().Data
 		parts := strings.Split(data, "|")
@@ -202,12 +221,18 @@ func handleSearch(ctx context.Context, c tele.Context, service *service.Service,
 
 		// Extract hash for callback and display
 		magnet := torrent.Magnet
+		if magnet == "" {
+			continue
+		}
 		hash := ""
 		if startIdx := strings.Index(magnet, "btih:"); startIdx != -1 {
 			hash = magnet[startIdx+5:]
 			if endIdx := strings.Index(hash, "&"); endIdx != -1 {
 				hash = hash[:endIdx]
 			}
+		}
+		if hash == "" {
+			continue
 		}
 		err = service.Cache.Set(hash, magnet)
 		if err != nil {
@@ -269,4 +294,16 @@ func handleSearch(ctx context.Context, c tele.Context, service *service.Service,
 		return c.Edit(msg.String(), options)
 	}
 	return c.Send(msg.String(), options)
+}
+
+func checkUser(config *types.Config, senderId int64) error {
+	if len(config.SenderID) == 0 {
+		return nil
+	}
+	for _, id := range config.SenderID {
+		if id == senderId {
+			return nil
+		}
+	}
+	return fmt.Errorf("用户 %d 未被授权使用该 bot", senderId)
 }
