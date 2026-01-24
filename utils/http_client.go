@@ -20,7 +20,7 @@ func NewProxyClient(config *types.Config) *http.Client {
 	proxyURL, err := url.Parse(config.Proxy.URL)
 	if err != nil {
 		slog.Error("Failed to parse proxy URL", "error", err, "url", config.Proxy.URL)
-		return &http.Client{}
+		return &http.Client{Timeout: time.Second * 5}
 	}
 	transport := &http.Transport{
 		Proxy: http.ProxyURL(proxyURL),
