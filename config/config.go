@@ -1,6 +1,7 @@
 package config
 
 import (
+	"fmt"
 	"os"
 	"telegramBittorrentDownloader/types"
 	"telegramBittorrentDownloader/utils"
@@ -15,12 +16,12 @@ func InitConfig() (*types.Config, error) {
 
 	data, err := os.ReadFile(configPath)
 	if err != nil {
-		panic(err)
+		return nil, fmt.Errorf("failed to read config file: %w", err)
 	}
 
 	// 4. 解析YAML
 	if err = yaml.Unmarshal(data, &config); err != nil {
-		panic(err)
+		return nil, fmt.Errorf("failed to unmarshal config file: %w", err)
 	}
 
 	// 5. 初始化代理客户端
