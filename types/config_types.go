@@ -27,10 +27,11 @@ type Searcher struct {
 }
 
 type Downloader struct {
-	Name     string            `yaml:"name"`
-	Enable   bool              `yaml:"enable"`
-	Username string            `yaml:"username"`
-	Password string            `yaml:"password"`
-	ApiURL   string            `yaml:"api_url"`
-	Extra    map[string]string `yaml:"extra"`
+	Name                 string            `yaml:"name"`
+	Enable               bool              `yaml:"enable"`
+	Username             string            `yaml:"username"`
+	Password             string            `yaml:"password"`
+	ApiURL               string            `yaml:"api_url"`
+	LoginIntervalSeconds int               `yaml:"login_interval_seconds"`
+	Extra                map[string]string `yaml:"extra"`
 }
