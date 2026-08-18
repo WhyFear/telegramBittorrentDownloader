@@ -8,9 +8,18 @@ type Config struct {
 	SenderID   []int64      `yaml:"SenderID"`
 	Proxy      Proxy        `yaml:"Proxy"`
 	Bot        Bot          `yaml:"bot"`
+	API        APIConfig    `yaml:"api"`
 	Searcher   []Searcher   `yaml:"searcher"`
 	Downloader []Downloader `yaml:"downloader"`
 }
+
+// APIConfig controls the optional HTTP download API.
+type APIConfig struct {
+	ListenIP string `yaml:"listen_ip"`
+	Port     int    `yaml:"port"`
+	Token    string `yaml:"token"`
+}
+
 type Proxy struct {
 	URL    string       `yaml:"URL"`
 	Client *http.Client `yaml:"-"`

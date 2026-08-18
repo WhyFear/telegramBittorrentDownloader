@@ -1,5 +1,30 @@
 # Telegram Bittorrent Downloader
 
+## HTTP 下载接口
+
+项目可以在保留 Telegram Bot 的同时提供 HTTP 下载接口。默认配置中的 `api.port` 为
+`0`，因此接口默认关闭。启用示例：
+
+```yaml
+api:
+  listen_ip: "127.0.0.1"
+  port: 8081
+  token: "replace-with-your-token"
+```
+
+请求地址为 `POST /api/v1/downloads`，请求体接受完整 Magnet 链接或 40 位 Hash，
+`channel` 当前使用 `qbittorrent`：
+
+```powershell
+curl.exe -X POST "http://127.0.0.1:8081/api/v1/downloads" `
+  -H "Authorization: Bearer replace-with-your-token" `
+  -H "Content-Type: application/json" `
+  -d '{"magnet":"magnet:?xt=urn:btih:0123456789abcdef0123456789abcdef01234567","channel":"qbittorrent"}'
+```
+
+Token 为空时接口不校验 `Authorization` Header。若在 Docker 中通过端口映射访问，
+需要将 `listen_ip` 设置为 `0.0.0.0`，并使用 `-p 8081:8081` 暴露端口。
+
 一个基于 Telegram Bot 的磁力链接搜索与下载工具。支持从 Nyaa 搜索资源，并一键推送到 qBittorrent 进行下载。
 
 ## 功能特性
