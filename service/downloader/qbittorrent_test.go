@@ -17,6 +17,40 @@ import (
 
 const testQBittorrentMagnet = "magnet:?xt=urn:btih:0123456789abcdef0123456789abcdef01234567"
 
+func TestNewQBittorrentDownloaderAcceptsLoginSuccessResponses(t *testing.T) {
+	tests := []struct {
+		name       string
+		statusCode int
+		body       string
+	}{
+		{name: "legacy response", statusCode: http.StatusOK, body: "Ok."},
+		{name: "current response", statusCode: http.StatusNoContent},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			server := httptest.NewServer(http.HandlerFunc(func(
+				response http.ResponseWriter,
+				request *http.Request,
+			) {
+				assert.Equal(t, "/api/v2/auth/login", request.URL.Path)
+				http.SetCookie(response, &http.Cookie{
+					Name: "SID", Value: "session", Path: "/",
+				})
+				response.WriteHeader(test.statusCode)
+				writeTestResponse(t, response, test.body)
+			}))
+			defer server.Close()
+
+			_, err := NewQBittorrentDownloader(types.Downloader{
+				ApiURL: server.URL,
+			})
+
+			require.NoError(t, err)
+		})
+	}
+}
+
 func TestNewQBittorrentDownloaderValidatesLoginResponse(t *testing.T) {
 	tests := []struct {
 		name       string

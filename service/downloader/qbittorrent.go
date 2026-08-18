@@ -97,11 +97,16 @@ func (q *QBittorrent) ensureLogin(ctx context.Context) error {
 	if err != nil {
 		return err
 	}
-	if statusCode != http.StatusOK {
+	switch statusCode {
+	case http.StatusNoContent:
+		// Current qBittorrent versions return 204 after a successful login.
+	case http.StatusOK:
+		// Older qBittorrent versions report success with a plain-text body.
+		if strings.TrimSpace(string(responseBody)) != "Ok." {
+			return errors.New("qBittorrent rejected the login credentials")
+		}
+	default:
 		return fmt.Errorf("qBittorrent login returned HTTP %d", statusCode)
-	}
-	if strings.TrimSpace(string(responseBody)) != "Ok." {
-		return errors.New("qBittorrent rejected the login credentials")
 	}
 	q.lastLoginAt = time.Now()
 	return nil
