@@ -1,6 +1,8 @@
 package main
 
 import (
+	"log/slog"
+
 	"telegramBittorrentDownloader/service"
 	"telegramBittorrentDownloader/service/cache"
 	downloader2 "telegramBittorrentDownloader/service/downloader"
@@ -24,12 +26,16 @@ func initSearcher(config *types.Config) map[string]searcher2.Searcher {
 func initDownloader(config *types.Config) map[string]downloader2.Downloader {
 	downloaders := make(map[string]downloader2.Downloader)
 	for _, d := range config.Downloader {
-		if d.Enable {
-			if d.Name == "qbittorrent" {
-				downloaders[d.Name] = downloader2.NewQBittorrentDownloader(d)
-			}
-			// todo 可以在这里添加其他下载器的初始化逻辑
+		if !d.Enable {
+			continue
 		}
+
+		dl, err := downloader2.NewFromConfig(d)
+		if err != nil {
+			slog.Error("Failed to initialize downloader", "channel", d.Name, "error", err)
+			continue
+		}
+		downloaders[downloader2.NormalizeName(d.Name)] = dl
 	}
 	return downloaders
 }

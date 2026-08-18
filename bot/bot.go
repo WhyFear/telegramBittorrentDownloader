@@ -6,9 +6,10 @@ import (
 	"log/slog"
 	"strconv"
 	"strings"
+	"time"
+
 	"telegramBittorrentDownloader/service"
 	"telegramBittorrentDownloader/types"
-	"time"
 
 	tele "gopkg.in/telebot.v4"
 )
@@ -99,12 +100,7 @@ func InitBot(ctx context.Context, config *types.Config, service *service.Service
 		magnetHash := c.Callback().Data
 		magnet := "magnet:?xt=urn:btih:" + magnetHash
 
-		dl, ok := service.Downloader["qbittorrent"]
-		if !ok || dl == nil {
-			return c.Send("❌ 错误：qBittorrent 下载器未配置或初始化失败")
-		}
-
-		err := dl.AddMagnet(ctx, magnet)
+		err := service.AddMagnet(ctx, "qbittorrent", magnet)
 		if err != nil {
 			return c.Send(fmt.Sprintf("❌ 添加下载失败: %s", err.Error()))
 		}
@@ -148,27 +144,7 @@ func isStartDownloadPayload(payload string) bool {
 }
 
 func addMagnet(ctx context.Context, magnet string, service *service.Service) error {
-	magnet = strings.TrimSpace(magnet)
-	if magnet == "" {
-		return fmt.Errorf("磁力链接不能为空")
-	}
-
-	if !strings.HasPrefix(magnet, "magnet:?") {
-		// 如果只是 hash，尝试补全
-		if len(magnet) == 40 {
-			magnet = "magnet:?xt=urn:btih:" + magnet
-		} else {
-			return fmt.Errorf("无效的磁力链接或 Hash")
-		}
-	}
-
-	dl, ok := service.Downloader["qbittorrent"]
-	if !ok || dl == nil {
-		return fmt.Errorf("qBittorrent 下载器未配置或初始化失败")
-	}
-
-	err := dl.AddMagnet(ctx, magnet)
-	return err
+	return service.AddMagnet(ctx, "qbittorrent", magnet)
 }
 
 // 处理搜索和翻页逻辑

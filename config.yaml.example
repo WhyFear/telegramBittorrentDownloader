@@ -1,5 +1,9 @@
 Proxy:
   URL: "" # 代理地址，例如 http://127.0.0.1:7890，留空则不使用代理
+api:
+  listen_ip: "127.0.0.1" # API 监听 IP；Docker 对外暴露时使用 0.0.0.0
+  port: 0                 # 设为 0 时不启动 API
+  token: ""              # 非空时要求 Authorization: Bearer <token>
 bot:
   bot_name: "your_bot_name" # 你的机器人用户名（不含 @）
   token: "your_bot_token"   # 从 @BotFather 获取的 Token
