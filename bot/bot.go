@@ -74,11 +74,13 @@ func InitBot(ctx context.Context, config *types.Config, service *service.Service
 		magnet := c.Message().Payload
 		magnet = strings.TrimSpace(magnet)
 		if magnet != "" {
-			if len(magnet) == 40 {
-				magnetLink, _ := service.Cache.Get(magnet)
-				if magnetLink != "" {
-					slog.InfoContext(ctx, "命中缓存", "magnet", magnet, "magnetLink", magnetLink)
-					magnet = magnetLink
+			if isStartDownloadPayload(magnet) {
+				if len(magnet) == 40 {
+					magnetLink, _ := service.Cache.Get(magnet)
+					if magnetLink != "" {
+						slog.InfoContext(ctx, "命中缓存", "magnet", magnet, "magnetLink", magnetLink)
+						magnet = magnetLink
+					}
 				}
 				err := addMagnet(ctx, magnet, service)
 				if err != nil {
@@ -139,6 +141,10 @@ func InitBot(ctx context.Context, config *types.Config, service *service.Service
 	})
 
 	b.Start()
+}
+
+func isStartDownloadPayload(payload string) bool {
+	return len(payload) == 40 || strings.HasPrefix(payload, "magnet:?")
 }
 
 func addMagnet(ctx context.Context, magnet string, service *service.Service) error {
